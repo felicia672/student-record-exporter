@@ -8,7 +8,7 @@ class Student:
         self.class_sec = class_sec
         self.fav_sub = fav_sub
         self.dob = dob
-        self.marks = marks  # A list of test scores
+        self.marks = marks  
         self.average = self.calculate_average()
         self.grade = self.calculate_grade()
 
@@ -40,7 +40,7 @@ def generate_html_report(students, output_filename="index.html"):
             
     passing_count = sum(1 for s in students if s.grade != "F")
 
-    # Generate the table rows dynamically for all 100 students
+    # Generate the table rows dynamically
     table_rows = ""
     for s in students:
         table_rows += f"""
@@ -50,18 +50,18 @@ def generate_html_report(students, output_filename="index.html"):
             <td>{s.class_sec}</td>
             <td>{s.fav_sub}</td>
             <td>{s.dob}</td>
-            <td>{s.average}%</td>
+            <td data-value="{s.average}">{s.average}%</td>
             <td class="grade-{s.grade}">{s.grade}</td>
         </tr>
         """
 
-    # The HTML boilerplate with embedded CSS styling + KPI Cards
+    # Fully interactive HTML layout with searching and sorting arrays
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Analytics Dashboard</title>
+    <title>Live Student Search & Sort Dashboard</title>
     <style>
         body {{
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -111,13 +111,33 @@ def generate_html_report(students, output_filename="index.html"):
             font-weight: bold;
             color: #0f172a;
         }}
+
+        /* Search input elements bar */
+        .search-container {{
+            margin: 20px 0 10px 0;
+            width: 100%;
+        }}
+        .search-box {{
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }}
+        .search-box:focus {{
+            border-color: #2563eb;
+        }}
+
         table {{
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }}
         th, td {{
-            padding: 10px 16px;
+            padding: 12px 16px;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
             font-size: 14px;
@@ -126,8 +146,11 @@ def generate_html_report(students, output_filename="index.html"):
             background-color: #f1f5f9;
             color: #475569;
             font-weight: 600;
-            position: sticky;
-            top: 0; /* Keeps headers visible when scrolling large data arrays */
+            cursor: pointer; /* Indicates headers are clickable elements */
+            user-select: none;
+        }}
+        th:hover {{
+            background-color: #e2e8f0;
         }}
         tr:hover {{
             background-color: #f8fafc;
@@ -142,7 +165,7 @@ def generate_html_report(students, output_filename="index.html"):
 <body>
     <div class="container">
         <h1>Academic Performance Dashboard</h1>
-        <p>Big Data Simulation: 100 Student Records.</p>
+        <p>Interactive Client View: Live Search and Column Sorting enabled.</p>
         
         <div class="analytics-grid">
             <div class="card accent-blue">
@@ -159,16 +182,21 @@ def generate_html_report(students, output_filename="index.html"):
             </div>
         </div>
 
-        <table>
+        <!-- Real-time Filter Query Input Box -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search for student names, classes, or subjects in real time...">
+        </div>
+
+        <table id="studentTable">
             <thead>
                 <tr>
-                    <th>S.No.</th>
-                    <th>Name</th>
-                    <th>Class & Sec</th>
-                    <th>Fav. Subject</th>
-                    <th>D.O.B.</th>
-                    <th>Avg Marks</th>
-                    <th>Grade</th>
+                    <th onclick="sortTable(0)">S.No. ↕</th>
+                    <th onclick="sortTable(1)">Name ↕</th>
+                    <th onclick="sortTable(2)">Class & Sec ↕</th>
+                    <th onclick="sortTable(3)">Fav. Subject ↕</th>
+                    <th onclick="sortTable(4)">D.O.B. ↕</th>
+                    <th onclick="sortTable(5)">Avg Marks ↕</th>
+                    <th onclick="sortTable(6)">Grade ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -176,16 +204,66 @@ def generate_html_report(students, output_filename="index.html"):
             </tbody>
         </table>
     </div>
+
+    <!-- Frontend Interactive JavaScript Component -->
+    <script>
+        // 1. Live Filter/Search Functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {{
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#studentTable tbody tr');
+            
+            rows.forEach(row => {{
+                let text = row.textContent.toLowerCase();
+                // If query matches any text string inside the row elements, display it
+                if (text.includes(filter)) {{
+                    row.style.display = '';
+                }} else {{
+                    row.style.display = 'none';
+                }}
+            }});
+        }});
+
+        // 2. Interactive Column Sorting Algorithm
+        let sortDirections = {{}};
+        function sortTable(columnIndex) {{
+            let table = document.getElementById('studentTable');
+            let tbody = table.querySelector('tbody');
+            let rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle directions between ascending/descending trackers
+            let ascending = sortDirections[columnIndex] === undefined ? true : !sortDirections[columnIndex];
+            sortDirections[columnIndex] = ascending;
+
+            rows.sort((rowA, rowB) => {{
+                let cellA = rowA.children[columnIndex];
+                let cellB = rowB.children[columnIndex];
+
+                // Extract custom values for precise floating math sorting, else fallback to text strings
+                let valA = cellA.getAttribute('data-value') || cellA.textContent.trim();
+                let valB = cellB.getAttribute('data-value') || cellB.textContent.trim();
+
+                // Convert numbers for clean numerical values comparison
+                if (!isNaN(valA) && !isNaN(valB)) {{
+                    return ascending ? valA - valB : valB - valA;
+                }}
+                
+                // Alphabetic comparison
+                return ascending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            }});
+
+            // Append organized sorting arrays back into document grid node blocks
+            rows.forEach(row => tbody.appendChild(row));
+        }}
+    </script>
 </body>
 </html>
 """
 
     with open(output_filename, "w", encoding="utf-8") as file:
         file.write(html_content)
-    print(f"🚀 Success! Simulated {total_students} records inside '{output_filename}'")
+    print(f"🚀 Success! Interactive sorting matrix built into '{output_filename}'")
 
 if __name__ == "__main__":
-    # Seed lists for random data compilation
     first_names = ["Aarav", "Diya", "Kabir", "Ananya", "Vivaan", "Isha", "Arjun", "Meera", "Rohan", "Sanya", "Rahul", "Neha", "Aditya", "Pooja", "Karan", "Riya"]
     last_names = ["Sharma", "Patel", "Singh", "Rao", "Das", "Joshi", "Mehta", "Kumar", "Verma", "Nair", "Gupta", "Reddy", "Choudhury", "Mishra"]
     subjects = ["Mathematics", "Science", "History", "English", "Computer Science", "Physics", "Chemistry"]
@@ -193,21 +271,10 @@ if __name__ == "__main__":
 
     student_database = []
 
-    # Dynamic generation loop to build exactly 100 student records
     for i in range(1, 101):
         name = f"{random.choice(first_names)} {random.choice(last_names)}"
         class_sec = random.choice(sections)
         fav_sub = random.choice(subjects)
         
-        # Make a mock date of birth
         day = str(random.randint(1, 28)).zfill(2)
         month = str(random.randint(1, 12)).zfill(2)
-        dob = f"{day}-{month}-2011"
-        
-        # Generate 3 mock scores skewed towards passing grades
-        marks = [random.randint(55, 100) for _ in range(3)]
-        
-        student = Student(i, name, class_sec, fav_sub, dob, marks)
-        student_database.append(student)
-
-    generate_html_report(student_database)
