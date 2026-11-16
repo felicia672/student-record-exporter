@@ -7,7 +7,7 @@ class Student:
         self.class_sec = class_sec
         self.fav_sub = fav_sub
         self.dob = dob
-        self.marks = marks # A list of 3 test scores out of 100
+        self.marks = marks  # A list of 3 test scores out of 100
         self.average = self.calculate_average()
         self.grade = self.calculate_grade()
 
@@ -24,6 +24,21 @@ class Student:
         else: return "F"
 
 def generate_html_report(students, output_filename="index.html"):
+    # --- DASHBOARD ANALYTICS COMPUTATION ---
+    total_students = len(students)
+    
+    # 1. Calculate Class Average Percentage
+    class_average = round(sum(s.average for s in students) / total_students, 2)
+    
+    # 2. Identify the Highest Scorer
+    highest_scorer = students[0]
+    for s in students:
+        if s.average > highest_scorer.average:
+            highest_scorer = s
+            
+    # 3. Count total passing grades (A, B, C, D) vs Failing (F)
+    passing_count = sum(1 for s in students if s.grade != "F")
+
     # Generate the table rows dynamically using a loop
     table_rows = ""
     for s in students:
@@ -39,13 +54,13 @@ def generate_html_report(students, output_filename="index.html"):
         </tr>
         """
 
-    # The HTML boilerplate with embedded CSS styling
+    # The HTML boilerplate with embedded CSS styling + new KPI Cards
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated Student Dashboard</title>
+    <title>Academic Analytics Dashboard</title>
     <style>
         body {{
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -54,7 +69,7 @@ def generate_html_report(students, output_filename="index.html"):
             color: #1e293b;
         }}
         .container {{
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             padding: 30px;
@@ -67,6 +82,37 @@ def generate_html_report(students, output_filename="index.html"):
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 10px;
         }}
+        
+        /* Analytics Grid Layout */
+        .analytics-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }}
+        .card {{
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #64748b;
+        }}
+        .card.accent-green {{ border-left-color: #16a34a; }}
+        .card.accent-blue {{ border-left-color: #2563eb; }}
+        .card.accent-purple {{ border-left-color: #7c3aed; }}
+        
+        .card-title {{
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }}
+        .card-value {{
+            font-size: 22px;
+            font-weight: bold;
+            color: #0f172a;
+        }}
+        
         table {{
             width: 100%;
             border-collapse: collapse;
@@ -85,7 +131,6 @@ def generate_html_report(students, output_filename="index.html"):
         tr:hover {{
             background-color: #f8fafc;
         }}
-        /* Color coding for grades */
         .grade-A {{ color: #16a34a; font-weight: bold; }}
         .grade-B {{ color: #2563eb; font-weight: bold; }}
         .grade-C {{ color: #d97706; font-weight: bold; }}
@@ -97,6 +142,23 @@ def generate_html_report(students, output_filename="index.html"):
     <div class="container">
         <h1>Academic Performance Dashboard</h1>
         <p>Generated automatically via Python Backend script.</p>
+        
+        <!-- Live Analytics Cards Section -->
+        <div class="analytics-grid">
+            <div class="card accent-blue">
+                <div class="card-title">Class Average</div>
+                <div class="card-value">{class_average}%</div>
+            </div>
+            <div class="card accent-purple">
+                <div class="card-title">Top Performer</div>
+                <div class="card-value">{highest_scorer.name} ({highest_scorer.average}%)</div>
+            </div>
+            <div class="card accent-green">
+                <div class="card-title">Passing Roster</div>
+                <div class="card-value">{passing_count} / {total_students} Students</div>
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -120,16 +182,16 @@ def generate_html_report(students, output_filename="index.html"):
 
     with open(output_filename, "w", encoding="utf-8") as file:
         file.write(html_content)
-    print(f" Success! HTML dashboard generated as '{output_filename}'")
+    print(f" Success! Enhanced HTML dashboard generated as '{output_filename}'")
 
 if __name__ == "__main__":
-    # Sample Student Database (5 columns + performance metrics data)
+    # Student Database populated with sample grades lists: [Quiz, Midterm, Final]
     student_database = [
-        Student(1, "Aarav Sharma", "10-A", "Mathematics", "12-04-2011", [95, 88, 92]),
+        Student(1, "Aarav Sharma", "10-A", "Mathematics", "12-04-2011", [88, 92, 95]),
         Student(2, "Diya Patel", "10-B", "Science", "23-08-2011", [78, 85, 80]),
-        Student(3, "Kabir Singh", "10-A", "History", "05-01-2012", [62, 70, 65]),
-        Student(4, "Ananya Rao", "10-C", "English", "19-11-2011", [88, 91, 94]),
-        Student(5, "Vivaan Das", "10-B", "Computer Science", "30-06-2011", [98, 95, 100]),
+        Student(3, "Kabir Singh", "10-A", "History", "05-01-2012", [95, 98, 97]),
+        Student(4, "Ananya Rao", "10-C", "English", "19-11-2011", [60, 72, 68]),
+        Student(5, "Vivaan Das", "10-B", "Computer Science", "30-06-2011", [85, 90, 88]),
     ]
 
     generate_html_report(student_database)
