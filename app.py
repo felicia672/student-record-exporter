@@ -1,4 +1,5 @@
 import os
+import random
 
 class Student:
     def __init__(self, sno, name, class_sec, fav_sub, dob, marks):
@@ -39,7 +40,7 @@ def generate_html_report(students, output_filename="index.html"):
             
     passing_count = sum(1 for s in students if s.grade != "F")
 
-    # Generate the table rows dynamically
+    # Generate the table rows dynamically for all 100 students
     table_rows = ""
     for s in students:
         table_rows += f"""
@@ -54,7 +55,7 @@ def generate_html_report(students, output_filename="index.html"):
         </tr>
         """
 
-    # The HTML boilerplate with embedded CSS styling + new KPI Cards
+    # The HTML boilerplate with embedded CSS styling + KPI Cards
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,7 +70,7 @@ def generate_html_report(students, output_filename="index.html"):
             color: #1e293b;
         }}
         .container {{
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
             background: white;
             padding: 30px;
@@ -116,14 +117,17 @@ def generate_html_report(students, output_filename="index.html"):
             margin-top: 20px;
         }}
         th, td {{
-            padding: 12px 16px;
+            padding: 10px 16px;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
         }}
         th {{
             background-color: #f1f5f9;
             color: #475569;
             font-weight: 600;
+            position: sticky;
+            top: 0; /* Keeps headers visible when scrolling large data arrays */
         }}
         tr:hover {{
             background-color: #f8fafc;
@@ -138,7 +142,7 @@ def generate_html_report(students, output_filename="index.html"):
 <body>
     <div class="container">
         <h1>Academic Performance Dashboard</h1>
-        <p>Generated automatically via Python Backend script.</p>
+        <p>Big Data Simulation: 100 Student Records.</p>
         
         <div class="analytics-grid">
             <div class="card accent-blue">
@@ -178,51 +182,32 @@ def generate_html_report(students, output_filename="index.html"):
 
     with open(output_filename, "w", encoding="utf-8") as file:
         file.write(html_content)
-    print(f"\n✨ Success! Dashboard compiled locally as '{output_filename}'\n")
+    print(f"🚀 Success! Simulated {total_students} records inside '{output_filename}'")
 
 if __name__ == "__main__":
+    # Seed lists for random data compilation
+    first_names = ["Aarav", "Diya", "Kabir", "Ananya", "Vivaan", "Isha", "Arjun", "Meera", "Rohan", "Sanya", "Rahul", "Neha", "Aditya", "Pooja", "Karan", "Riya"]
+    last_names = ["Sharma", "Patel", "Singh", "Rao", "Das", "Joshi", "Mehta", "Kumar", "Verma", "Nair", "Gupta", "Reddy", "Choudhury", "Mishra"]
+    subjects = ["Mathematics", "Science", "History", "English", "Computer Science", "Physics", "Chemistry"]
+    sections = ["10-A", "10-B", "10-C"]
+
     student_database = []
-    serial_counter = 1
 
-    print("=========================================")
-    print("      STUDENT DASHBOARD GENERATOR        ")
-    print("=========================================")
-    
-    while True:
-        print(f"\nEntering details for Student #{serial_counter}:")
+    # Dynamic generation loop to build exactly 100 student records
+    for i in range(1, 101):
+        name = f"{random.choice(first_names)} {random.choice(last_names)}"
+        class_sec = random.choice(sections)
+        fav_sub = random.choice(subjects)
         
-        name = input("Enter Name (or type 'exit' to finish): ").strip()
-        if name.lower() == 'exit':
-            break
-            
-        class_sec = input("Enter Class & Section (e.g., 10-A): ").strip()
-        fav_sub = input("Enter Favorite Subject: ").strip()
-        dob = input("Enter Date of Birth (DD-MM-YYYY): ").strip()
+        # Make a mock date of birth
+        day = str(random.randint(1, 28)).zfill(2)
+        month = str(random.randint(1, 12)).zfill(2)
+        dob = f"{day}-{month}-2011"
         
-        # Collect marks loop
-        marks = []
-        print("Enter 3 test scores out of 100:")
-        for i in range(1, 4):
-            while True:
-                try:
-                    score = float(input(f"  Test {i} Score: "))
-                    if 0 <= score <= 100:
-                        marks.append(score)
-                        break
-                    else:
-                        print("  ❌ Score must be between 0 and 100.")
-                except ValueError:
-                    print("  ❌ Invalid input. Please enter a valid number.")
+        # Generate 3 mock scores skewed towards passing grades
+        marks = [random.randint(55, 100) for _ in range(3)]
+        
+        student = Student(i, name, class_sec, fav_sub, dob, marks)
+        student_database.append(student)
 
-        # Create student object and add to data array
-        new_student = Student(serial_counter, name, class_sec, fav_sub, dob, marks)
-        student_database.append(new_student)
-        
-        print(f"✅ Added {name} successfully! (Average: {new_student.average}%, Grade: {new_student.grade})")
-        serial_counter += 1
-
-    # If the user added students before exiting, generate the report
-    if student_database:
-        generate_html_report(student_database)
-    else:
-        print("\n👋 Exited application without creating any records.")
+    generate_html_report(student_database)
