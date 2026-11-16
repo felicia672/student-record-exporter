@@ -1,17 +1,43 @@
-# Student Record System to HTML Exporter
+# 📊 Student Record Automator & Interactive Dashboard
 
-A lightweight Python automation tool built using Object-Oriented Programming (OOP) concepts. The script processes custom structured student logs, calculates terminal average percentages, assigns algorithmic letter grades, and compiles the raw attributes into a fully responsive, clean HTML dashboard sheet.
+A full-stack automation utility that transforms raw student performance logs into a data-dense, fully interactive web dashboard. Built using native scripts with zero external library packages.
 
-## Features
-- Dynamic evaluation of grades based on floating point arrays.
-- Automated clean styling injection (CSS).
-- Zero external package dependencies (built purely with native Python file I/O).
+---
 
-## How to Run Locally
-1. Clone this repository or download the source files.
-2. Open your terminal inside the project directory.
-3. Run the application:
+## 🛠️ Technology Stack & Architecture
+
+![Python](https://shields.io)
+![JavaScript](https://shields.io)
+![HTML5](https://shields.io)
+![CSS3](https://shields.io)
+![Git](https://shields.io)
+![GitHub Pages](https://shields.io)
+
+- **Backend Logic (Python):** Object-Oriented pipeline processing structural `Student` class records to calculate floating-point analytics and algorithmically evaluate grade scales.
+- **Frontend Interactivity (JavaScript DOM):** Real-time client-side scripting providing instant string-matching row search filters and dynamic column array sorting algorithms.
+- **Automated Deployment:** Custom file-stream compilation engine hooked into Git workflows to serve massive datasets instantly via cloud hosting.
+
+---
+
+## 🚀 Live Demo
+
+You can interact with the live deployed table here:  
+👉 **[View Live Interactive Dashboard](https://github.io)**
+
+---
+
+## 💻 How to Run Locally
+
+1. **Clone the repository workspace:**
+   ```bash
+   git clone https://github.com
+   cd student-record-exporter
+   ```
+
+2. **Execute the automation pipeline script:**
    ```bash
    python app.py
    ```
-4. Open the freshly generated `index.html` inside your web browser.
+
+3. **Launch the compiled website view:**
+   Open the newly generated `index.html` file inside any default web browser.
