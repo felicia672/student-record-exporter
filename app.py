@@ -7,7 +7,7 @@ class Student:
         self.class_sec = class_sec
         self.fav_sub = fav_sub
         self.dob = dob
-        self.marks = marks  # A list of 3 test scores out of 100
+        self.marks = marks  # A list of test scores
         self.average = self.calculate_average()
         self.grade = self.calculate_grade()
 
@@ -24,22 +24,22 @@ class Student:
         else: return "F"
 
 def generate_html_report(students, output_filename="index.html"):
-    # --- DASHBOARD ANALYTICS COMPUTATION ---
     total_students = len(students)
-    
-    # 1. Calculate Class Average Percentage
+    if total_students == 0:
+        print("⚠ No student records to export.")
+        return
+
+    # --- DASHBOARD ANALYTICS COMPUTATION ---
     class_average = round(sum(s.average for s in students) / total_students, 2)
     
-    # 2. Identify the Highest Scorer
     highest_scorer = students[0]
     for s in students:
         if s.average > highest_scorer.average:
             highest_scorer = s
             
-    # 3. Count total passing grades (A, B, C, D) vs Failing (F)
     passing_count = sum(1 for s in students if s.grade != "F")
 
-    # Generate the table rows dynamically using a loop
+    # Generate the table rows dynamically
     table_rows = ""
     for s in students:
         table_rows += f"""
@@ -82,8 +82,6 @@ def generate_html_report(students, output_filename="index.html"):
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 10px;
         }}
-        
-        /* Analytics Grid Layout */
         .analytics-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -112,7 +110,6 @@ def generate_html_report(students, output_filename="index.html"):
             font-weight: bold;
             color: #0f172a;
         }}
-        
         table {{
             width: 100%;
             border-collapse: collapse;
@@ -143,7 +140,6 @@ def generate_html_report(students, output_filename="index.html"):
         <h1>Academic Performance Dashboard</h1>
         <p>Generated automatically via Python Backend script.</p>
         
-        <!-- Live Analytics Cards Section -->
         <div class="analytics-grid">
             <div class="card accent-blue">
                 <div class="card-title">Class Average</div>
@@ -182,16 +178,51 @@ def generate_html_report(students, output_filename="index.html"):
 
     with open(output_filename, "w", encoding="utf-8") as file:
         file.write(html_content)
-    print(f" Success! Enhanced HTML dashboard generated as '{output_filename}'")
+    print(f"\n✨ Success! Dashboard compiled locally as '{output_filename}'\n")
 
 if __name__ == "__main__":
-    # Student Database populated with sample grades lists: [Quiz, Midterm, Final]
-    student_database = [
-        Student(1, "Aarav Sharma", "10-A", "Mathematics", "12-04-2011", [88, 92, 95]),
-        Student(2, "Diya Patel", "10-B", "Science", "23-08-2011", [78, 85, 80]),
-        Student(3, "Kabir Singh", "10-A", "History", "05-01-2012", [95, 98, 97]),
-        Student(4, "Ananya Rao", "10-C", "English", "19-11-2011", [60, 72, 68]),
-        Student(5, "Vivaan Das", "10-B", "Computer Science", "30-06-2011", [85, 90, 88]),
-    ]
+    student_database = []
+    serial_counter = 1
 
-    generate_html_report(student_database)
+    print("=========================================")
+    print("      STUDENT DASHBOARD GENERATOR        ")
+    print("=========================================")
+    
+    while True:
+        print(f"\nEntering details for Student #{serial_counter}:")
+        
+        name = input("Enter Name (or type 'exit' to finish): ").strip()
+        if name.lower() == 'exit':
+            break
+            
+        class_sec = input("Enter Class & Section (e.g., 10-A): ").strip()
+        fav_sub = input("Enter Favorite Subject: ").strip()
+        dob = input("Enter Date of Birth (DD-MM-YYYY): ").strip()
+        
+        # Collect marks loop
+        marks = []
+        print("Enter 3 test scores out of 100:")
+        for i in range(1, 4):
+            while True:
+                try:
+                    score = float(input(f"  Test {i} Score: "))
+                    if 0 <= score <= 100:
+                        marks.append(score)
+                        break
+                    else:
+                        print("  ❌ Score must be between 0 and 100.")
+                except ValueError:
+                    print("  ❌ Invalid input. Please enter a valid number.")
+
+        # Create student object and add to data array
+        new_student = Student(serial_counter, name, class_sec, fav_sub, dob, marks)
+        student_database.append(new_student)
+        
+        print(f"✅ Added {name} successfully! (Average: {new_student.average}%, Grade: {new_student.grade})")
+        serial_counter += 1
+
+    # If the user added students before exiting, generate the report
+    if student_database:
+        generate_html_report(student_database)
+    else:
+        print("\n👋 Exited application without creating any records.")
